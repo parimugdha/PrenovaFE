@@ -11,7 +11,7 @@ const Signup = () => {
         name: "",
         whatsapp: "",
         password: "",
-        role: "study"
+        role: "user"
     });
 
     const formValidation = () => {
@@ -162,22 +162,6 @@ const Signup = () => {
                         {errors.password && (
                             <div className="invalid-feedback">{errors.password}</div>
                         )}
-                    </div>
-
-                    {/* Role */}
-                    <div className="mb-3">
-                        <label className="form-label">User Type</label>
-
-                        <select
-                            className="form-select"
-                            value={form.role}
-                            onChange={(e) =>
-                                setForm((prev) => ({ ...prev, role: e.target.value }))
-                            }
-                        >
-                            <option value="study">Study Participant</option>
-                            <option value="guest">General User</option>
-                        </select>
                     </div>
 
                     {/* Submit */}
