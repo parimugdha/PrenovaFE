@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 import API from "../utils/api";
 
 
@@ -39,7 +40,14 @@ export default function AdminDashboard() {
 
         apiCall
             .then(() => {
-                alert(editingId ? "Module updated" : "Module added");
+                // alert(editingId ? "Module updated" : "Module added");
+                Swal.fire({
+                    icon: "success",
+                    title: editingId ? "Module updated" : "Module added",
+                    text: "Succesfully Updated",
+                    timer: 2000,
+                    showConfirmButton: false
+                });
 
                 setForm({
                     title: "",

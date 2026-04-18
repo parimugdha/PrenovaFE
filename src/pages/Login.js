@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 import API from "../utils/api";
 import logo from "../assets/logo.jpeg";
 
@@ -23,7 +24,14 @@ const Login = () => {
             localStorage.setItem("token", res.data.token);
             localStorage.setItem("user", JSON.stringify(res.data.user));
 
-            alert("Login successful");
+            // alert("Login successful");
+            Swal.fire({
+                icon: "success",
+                title: "Login Successful",
+                text: "Welcome back!",
+                timer: 2000,
+                showConfirmButton: false
+            });
 
             // 🔷 Role-based navigation
             if (res.data.user.role === "admin") {

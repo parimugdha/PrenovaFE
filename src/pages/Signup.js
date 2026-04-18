@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import Swal from "sweetalert2";
 import API from '../utils/api'
 import logo from '../assets/logo.jpeg'
 
@@ -48,7 +49,14 @@ const Signup = () => {
             if (response.status === 200) {
                 navigate("/login");
             }
-            alert("Signup successful");
+            // alert("Signup successful");
+            Swal.fire({
+                icon: "success",
+                title: "Account Created",
+                text: "Your signup was successful!",
+                timer: 2000,
+                showConfirmButton: false
+            });
         } catch (err) {
             console.error(err);
             alert("Error");
@@ -63,7 +71,7 @@ const Signup = () => {
                     <img
                         src={logo}
                         alt="Prenova Logo"
-                        style={{ width: "70px", height: "70px", objectFit: "contain", borderRadius:'5rem' }}
+                        style={{ width: "70px", height: "70px", objectFit: "contain", borderRadius: '5rem' }}
                         className="mb-2"
                     />
                     <h2 className="fw-bold">Prenova</h2>
