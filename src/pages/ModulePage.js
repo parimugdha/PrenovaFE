@@ -136,7 +136,9 @@ export default function ModulePage() {
             {/* 📄 Content */}
             <div className="card p-3 mb-4">
                 <h5>Learning Content</h5>
-                <p>{module.content?.[lang] || module.content?.en}</p>
+                <p style={{ whiteSpace: "pre-wrap" }}>
+                    {module.content?.[lang] || module.content?.en}
+                </p>
             </div>
 
             {/* ❓ Quiz */}

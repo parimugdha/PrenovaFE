@@ -193,7 +193,7 @@ export default function AdminDashboard() {
                         <div className="card p-3">
 
                             <h5>{m.title}</h5>
-                            <p className="text-muted small">{m.content?.en}</p>
+                            <p style={{ whiteSpace: "pre-wrap" }} className="text-muted small">{m.content?.en}</p>
 
                             <button
                                 className="btn btn-purple btn-sm m-2"
