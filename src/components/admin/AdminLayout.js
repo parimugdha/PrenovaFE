@@ -3,17 +3,24 @@ import Topbar from "./Topbar";
 
 export default function AdminLayout({ children }) {
     return (
-        <div className="d-flex" style={{ minHeight: "100vh" }}>
+        <div className="prenova-admin">
 
-            <Sidebar />
+            <aside className="prenova-admin-sidebar">
+                <Sidebar />
+            </aside>
 
-            <div className="flex-grow-1 bg-light">
-                <Topbar />
+            <div className="prenova-admin-main">
 
-                <div className="p-4">
+                <header className="prenova-admin-topbar">
+                    <Topbar />
+                </header>
+
+                <main className="prenova-admin-content">
                     {children}
-                </div>
+                </main>
+
             </div>
+
         </div>
     );
 }

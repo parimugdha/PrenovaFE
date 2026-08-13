@@ -1,44 +1,61 @@
-import { Link, useLocation } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 
 export default function Sidebar() {
-    const location = useLocation();
-
     const menu = [
-        { name: "Dashboard", path: "/admin" },
-        { name: "Analytics", path: "/admin/analytics" }
+        {
+            name: "Dashboard",
+            path: "/admin",
+            icon: "⌂"
+        },
+        {
+            name: "Analytics",
+            path: "/admin/analytics",
+            icon: "📊"
+        },
+        {
+            name: "Users",
+            path: "/admin/users",
+            icon: "👥"
+        }
     ];
 
     return (
-        <div
-            style={{
-                width: "230px",
-                background: "#6f42c1",
-                color: "#fff",
-                padding: "20px"
-            }}
-        >
-            <h4 className="mb-4">Prenova Admin</h4>
+        <div className="admin-sidebar-content">
 
-            {menu.map((item, i) => (
-                <Link
-                    key={i}
-                    to={item.path}
-                    style={{
-                        display: "block",
-                        padding: "10px",
-                        borderRadius: "8px",
-                        marginBottom: "10px",
-                        textDecoration: "none",
-                        color: "#fff",
-                        background:
-                            location.pathname.includes(item.path)
-                                ? "rgba(255,255,255,0.2)"
-                                : "transparent"
-                    }}
-                >
-                    {item.name}
-                </Link>
-            ))}
+            <div className="admin-sidebar-brand">
+                <div className="admin-sidebar-logo">
+                    ♡
+                </div>
+
+                <div>
+                    <h2>Prenova</h2>
+                    <span>Admin Panel</span>
+                </div>
+            </div>
+
+            <nav className="admin-sidebar-nav">
+                {menu.map((item) => (
+                    <NavLink
+                        key={item.path}
+                        to={item.path}
+                        end={item.path === "/admin"}
+                    >
+                        <span className="admin-nav-icon">
+                            {item.icon}
+                        </span>
+
+                        <span>{item.name}</span>
+                    </NavLink>
+                ))}
+            </nav>
+
+            <div className="admin-sidebar-bottom">
+                <NavLink to="/dashboard">
+                    <span className="admin-nav-icon">←</span>
+                    <span>User Dashboard</span>
+                </NavLink>
+            </div>
+
         </div>
     );
 }

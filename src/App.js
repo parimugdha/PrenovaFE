@@ -15,6 +15,7 @@ import AboutUs from "./pages/AboutUs";
 import Resources from "./pages/Resources";
 import FAQ from "./pages/Faq";
 import Profile from "./pages/Profile";
+import AdminUsers from "./pages/admin/AdminUsers";
 
 function App() {
   return (
@@ -97,6 +98,15 @@ function App() {
                 <AdminDashboard />
               </AdminLayout>
             </AdminRoute>
+          }
+        />
+
+        <Route
+          path="/admin/users"
+          element={
+            <AdminLayout>
+              <AdminUsers />
+            </AdminLayout>
           }
         />
 
