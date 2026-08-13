@@ -7,4 +7,5 @@ export default function AdminRoute({ children }) {
     return <Navigate to="/dashboard" />;
   }
 
+  return children
 }
