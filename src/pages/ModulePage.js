@@ -1,6 +1,8 @@
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import API from "../utils/api";
+import "../../src/App.css";
+import SectionHeading from "../components/user/SectionHeading";
 
 export default function ModulePage() {
     const { id } = useParams();
@@ -15,8 +17,11 @@ export default function ModulePage() {
     const [progressSaved, setProgressSaved] = useState(false);
     const [alreadyCompleted, setAlreadyCompleted] = useState(false);
 
-    // 🔷 Fetch module
+    // ================= FETCH MODULE =================
+
     useEffect(() => {
+        setLoading(true);
+
         API.get(`/modules/${id}`)
             .then((res) => {
                 setModule(res.data);
@@ -28,31 +33,22 @@ export default function ModulePage() {
             });
     }, [id]);
 
-    // 🔷 Fetch quiz
+
+    // ================= FETCH QUIZ =================
+
     useEffect(() => {
         API.get(`/quiz/${id}`)
             .then((res) => setQuiz(res.data))
             .catch((err) => console.log(err));
     }, [id]);
 
-    // 🔷 Save in_progress
-    useEffect(() => {
-        if (!module || progressSaved) return;
 
-        API.post("/progress/save", {
-            moduleId: module._id,
-            status: "in_progress"
-        })
-            .then(() => setProgressSaved(true))
-            .catch((err) => console.log(err));
+    // ================= CHECK COMPLETION =================
 
-    }, [module, progressSaved]);
-
-    // 🔷 Check if already completed
     useEffect(() => {
         API.get("/progress")
             .then((res) => {
-                const found = res.data.modules.find(
+                const found = res.data.modules?.find(
                     (m) =>
                         m.moduleId?.toString() === id &&
                         m.status === "completed"
@@ -67,7 +63,24 @@ export default function ModulePage() {
             .catch((err) => console.log(err));
     }, [id]);
 
-    // 🔷 Handle Answer
+
+    // ================= SAVE IN PROGRESS =================
+
+    useEffect(() => {
+        if (!module || progressSaved || alreadyCompleted) return;
+
+        API.post("/progress/save", {
+            moduleId: module._id,
+            status: "in_progress"
+        })
+            .then(() => setProgressSaved(true))
+            .catch((err) => console.log(err));
+
+    }, [module, progressSaved, alreadyCompleted]);
+
+
+    // ================= HANDLE ANSWER =================
+
     const handleAnswer = (qId, optionIndex) => {
         setAnswers((prev) => ({
             ...prev,
@@ -75,8 +88,13 @@ export default function ModulePage() {
         }));
     };
 
-    // 🔷 Submit Quiz
+
+    // ================= SUBMIT QUIZ =================
+
     const handleSubmit = async () => {
+
+        if (quiz.length === 0) return;
+
         let correct = 0;
 
         quiz.forEach((q) => {
@@ -99,95 +117,695 @@ export default function ModulePage() {
         }
     };
 
-    if (loading) return <p className="text-center mt-5">Loading...</p>;
-    if (!module) return <p className="text-center mt-5">Module not found</p>;
 
-    return (
-        <div className="container mt-4">
+    // ================= LOADING =================
 
-            {/* 🔷 Title */}
-            <h3 className="mb-3">{module.title}</h3>
+    if (loading) {
+        return (
+            <div className="module-loading">
+                <div className="loading-heart">
+                    ♡
+                </div>
 
-            {/* 🎥 Video */}
-            <div className="mb-4">
-                <iframe
-                    width="100%"
-                    height="250"
-                    src={module.video}
-                    title="Video"
-                    allowFullScreen
-                ></iframe>
-            </div>
-
-            {/* 🌐 Language Toggle */}
-            <div className="d-flex justify-content-end mb-3">
-                {["en", "hi", "ta"].map((l) => (
-                    <button
-                        key={l}
-                        className={`btn btn-sm me-2 ${lang === l ? "btn-purple" : "btn-outline-secondary"
-                            }`}
-                        onClick={() => setLang(l)}
-                    >
-                        {l === "en" ? "English" : l === "hi" ? "हिंदी" : "தமிழ்"}
-                    </button>
-                ))}
-            </div>
-
-            {/* 📄 Content */}
-            <div className="card p-3 mb-4">
-                <h5>Learning Content</h5>
-                <p style={{ whiteSpace: "pre-wrap" }}>
-                    {module.content?.[lang] || module.content?.en}
+                <p>
+                    Preparing your learning journey...
                 </p>
             </div>
+        );
+    }
 
-            {/* ❓ Quiz */}
-            {quiz.length > 0 && (
-                <div className="card p-3 mb-4">
-                    <h5>Quiz</h5>
 
-                    {quiz.map((q, index) => (
-                        <div key={q._id} className="mb-3">
-                            <p className="fw-semibold">
-                                {index + 1}. {q.question}
+    // ================= NOT FOUND =================
+
+    if (!module) {
+        return (
+            <div className="module-not-found">
+
+                <div className="not-found-icon">
+                    ♡
+                </div>
+
+                <h2>
+                    Module not found
+                </h2>
+
+                <p>
+                    We couldn't find the learning module you're
+                    looking for.
+                </p>
+
+                <Link
+                    to="/modules"
+                    className="primary-button"
+                >
+                    ← Back to Modules
+                </Link>
+
+            </div>
+        );
+    }
+
+
+    // ================= CONTENT =================
+
+    const content =
+        module.content?.[lang] ||
+        module.content?.en ||
+        "Learning content is not available.";
+
+
+    const percentage =
+        quiz.length > 0
+            ? Math.round((score / quiz.length) * 100)
+            : 0;
+
+
+    return (
+        <div className="prenova-app">
+
+            {/* =================================================
+                NAVBAR
+            ================================================= */}
+
+            <nav className="prenova-navbar">
+
+                <div className="prenova-navbar-inner">
+
+                    {/* Brand */}
+
+                    <Link
+                        to="/dashboard"
+                        className="prenova-brand"
+                    >
+
+                        <div className="prenova-logo">
+                            ♡
+                        </div>
+
+                        <div>
+
+                            <div className="prenova-brand-name">
+                                Prenova
+                            </div>
+
+                            <div className="prenova-brand-tagline">
+                                Your Safe Motherhood Journey
+                            </div>
+
+                        </div>
+
+                    </Link>
+
+
+                    {/* Navigation */}
+
+                    <div className="prenova-nav-links">
+
+                        <Link
+                            to="/dashboard"
+                            className="prenova-nav-link"
+                        >
+                            Home
+                        </Link>
+
+                        <Link
+                            to="/modules"
+                            className="prenova-nav-link active"
+                        >
+                            Modules
+                        </Link>
+
+                        <Link
+                            to="/about"
+                            className="prenova-nav-link"
+                        >
+                            About Us
+                        </Link>
+
+                        <Link
+                            to="/resources"
+                            className="prenova-nav-link"
+                        >
+                            Resources
+                        </Link>
+
+                        <Link
+                            to="/faq"
+                            className="prenova-nav-link"
+                        >
+                            FAQ
+                        </Link>
+
+                    </div>
+
+
+                    {/* Right */}
+
+                    <div className="prenova-nav-right">
+
+                        <button className="language-button">
+                            🌐 English
+                            <span>⌄</span>
+                        </button>
+
+                        <button className="profile-button">
+                            👤 Profile
+                        </button>
+
+                        <button className="mobile-menu-button">
+                            ☰
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </nav>
+
+
+            {/* =================================================
+                MAIN
+            ================================================= */}
+
+            <main className="module-page">
+
+                {/* ================= BACK ================= */}
+
+                <Link
+                    to="/modules"
+                    className="module-back"
+                >
+                    ← Back to Modules
+                </Link>
+
+
+                {/* =================================================
+                    HERO
+                ================================================= */}
+
+                <section className="module-hero">
+
+                    <div className="module-hero-content">
+
+                        <div className="welcome-pill">
+                            <span>♡</span>
+                            PRENOVA LEARNING MODULE
+                        </div>
+
+                        <h1>
+                            {module.title}
+                        </h1>
+
+                        <p>
+                            {module.description ||
+                                "Learn important information and build confidence for a safer motherhood journey."}
+                        </p>
+
+
+                        <div className="module-meta">
+
+                            <span>
+                                📖 Learning Module
+                            </span>
+
+                            {quiz.length > 0 && (
+                                <span>
+                                    📝 {quiz.length} Questions
+                                </span>
+                            )}
+
+                            {alreadyCompleted && (
+                                <span className="completed-pill">
+                                    ✓ Completed
+                                </span>
+                            )}
+
+                        </div>
+
+                    </div>
+
+
+                    <div className="module-hero-illustration">
+
+                        <div className="module-hero-circle">
+                            🤰
+                        </div>
+
+                        <div className="module-floating-heart">
+                            ♡
+                        </div>
+
+                        <div className="module-baby-circle">
+                            👶
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                {/* =================================================
+                    VIDEO
+                ================================================= */}
+
+                {module.video && (
+
+                    <section className="learning-video-section">
+
+                        <SectionHeading
+                            label="WATCH & LEARN"
+                            title="Learn through video"
+                            description="Watch the educational video before moving on to the learning content."
+                        />
+
+                        <div className="video-card">
+
+                            <div className="video-wrapper">
+
+                                <iframe
+                                    src={module.video}
+                                    title={module.title}
+                                    allowFullScreen
+                                    loading="lazy"
+                                />
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+                )}
+
+
+                {/* =================================================
+                    LANGUAGE
+                ================================================= */}
+
+                <section className="language-section">
+
+                    <div>
+
+                        <span className="section-label">
+                            CHOOSE YOUR LANGUAGE
+                        </span>
+
+                        <h3>
+                            Learn in the language you're comfortable with
+                        </h3>
+
+                    </div>
+
+
+                    <div className="language-tabs">
+
+                        {["en", "hi", "ta"].map((language) => (
+
+                            <button
+                                key={language}
+                                className={
+                                    lang === language
+                                        ? "language-tab active"
+                                        : "language-tab"
+                                }
+                                onClick={() =>
+                                    setLang(language)
+                                }
+                            >
+
+                                {language === "en" &&
+                                    "English"}
+
+                                {language === "hi" &&
+                                    "हिंदी"}
+
+                                {language === "ta" &&
+                                    "தமிழ்"}
+
+                            </button>
+
+                        ))}
+
+                    </div>
+
+                </section>
+
+
+                {/* =================================================
+                    CONTENT
+                ================================================= */}
+
+                <section className="learning-content-section">
+
+                    <div className="learning-content-card">
+
+                        <div className="learning-content-header">
+
+                            <div className="content-icon">
+                                📖
+                            </div>
+
+                            <div>
+
+                                <span className="section-label">
+                                    LEARNING CONTENT
+                                </span>
+
+                                <h2>
+                                    Understanding {module.title}
+                                </h2>
+
+                            </div>
+
+                        </div>
+
+
+                        <div className="learning-content">
+
+                            {content
+                                .split("\n")
+                                .map((paragraph, index) => (
+
+                                    <p key={index}>
+                                        {paragraph || "\u00A0"}
+                                    </p>
+
+                                ))}
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                {/* =================================================
+                    QUIZ
+                ================================================= */}
+
+                {quiz.length > 0 && (
+
+                    <section className="quiz-section">
+
+                        <SectionHeading
+                            label="TEST YOUR KNOWLEDGE"
+                            title="Quick Knowledge Check"
+                            description="Answer the questions below to complete this module."
+                        />
+
+
+                        <div className="quiz-card">
+
+                            {quiz.map((q, index) => {
+
+                                const selected =
+                                    answers[q._id];
+
+                                return (
+
+                                    <div
+                                        key={q._id}
+                                        className="quiz-question"
+                                    >
+
+                                        <div className="question-number">
+                                            {index + 1}
+                                        </div>
+
+
+                                        <div className="question-content">
+
+                                            <h3>
+                                                {q.question}
+                                            </h3>
+
+
+                                            <div className="quiz-options">
+
+                                                {q.options.map(
+                                                    (option, optionIndex) => {
+
+                                                        const isSelected =
+                                                            selected ===
+                                                            optionIndex;
+
+                                                        const isCorrect =
+                                                            submitted &&
+                                                            optionIndex ===
+                                                            q.correctAnswer;
+
+                                                        const isWrong =
+                                                            submitted &&
+                                                            isSelected &&
+                                                            !isCorrect;
+
+                                                        let optionClass =
+                                                            "quiz-option";
+
+                                                        if (isSelected) {
+                                                            optionClass +=
+                                                                " selected";
+                                                        }
+
+                                                        if (isCorrect) {
+                                                            optionClass +=
+                                                                " correct";
+                                                        }
+
+                                                        if (isWrong) {
+                                                            optionClass +=
+                                                                " wrong";
+                                                        }
+
+                                                        return (
+
+                                                            <label
+                                                                key={optionIndex}
+                                                                className={
+                                                                    optionClass
+                                                                }
+                                                            >
+
+                                                                <input
+                                                                    type="radio"
+                                                                    name={q._id}
+                                                                    checked={
+                                                                        selected ===
+                                                                        optionIndex
+                                                                    }
+                                                                    onChange={() =>
+                                                                        handleAnswer(
+                                                                            q._id,
+                                                                            optionIndex
+                                                                        )
+                                                                    }
+                                                                    disabled={
+                                                                        submitted
+                                                                    }
+                                                                />
+
+                                                                <span className="custom-radio">
+                                                                    {isCorrect
+                                                                        ? "✓"
+                                                                        : ""}
+                                                                </span>
+
+                                                                <span>
+                                                                    {option}
+                                                                </span>
+
+                                                            </label>
+
+                                                        );
+                                                    }
+                                                )}
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                );
+
+                            })}
+
+
+                            {/* ================= SUBMIT ================= */}
+
+                            {!submitted &&
+                                !alreadyCompleted && (
+
+                                    <div className="quiz-submit-area">
+
+                                        <p>
+                                            Make sure you have answered
+                                            all questions before submitting.
+                                        </p>
+
+                                        <button
+                                            className="quiz-submit-button"
+                                            onClick={handleSubmit}
+                                        >
+                                            Complete Module
+                                            <span>→</span>
+                                        </button>
+
+                                    </div>
+
+                                )}
+
+
+                            {/* ================= RESULT ================= */}
+
+                            {submitted && (
+
+                                <div
+                                    className={`quiz-result ${
+                                        percentage >= 60
+                                            ? "success"
+                                            : "needs-review"
+                                    }`}
+                                >
+
+                                    <div className="result-icon">
+
+                                        {percentage >= 60
+                                            ? "✓"
+                                            : "↻"}
+
+                                    </div>
+
+
+                                    <div className="result-content">
+
+                                        <span>
+                                            {alreadyCompleted
+                                                ? "MODULE COMPLETED"
+                                                : "QUIZ COMPLETED"}
+                                        </span>
+
+                                        <h3>
+
+                                            {percentage >= 60
+                                                ? "Well done! 🌸"
+                                                : "Keep learning and try again."}
+
+                                        </h3>
+
+                                        <p>
+                                            You scored{" "}
+                                            <strong>
+                                                {score}
+                                            </strong>{" "}
+                                            out of{" "}
+                                            <strong>
+                                                {quiz.length}
+                                            </strong>{" "}
+                                            questions.
+                                        </p>
+
+                                    </div>
+
+
+                                    <div className="result-score">
+                                        {percentage}%
+                                    </div>
+
+                                </div>
+
+                            )}
+
+                        </div>
+
+                    </section>
+
+                )}
+
+
+                {/* =================================================
+                    COMPLETE MESSAGE
+                ================================================= */}
+
+                {submitted && (
+
+                    <section className="module-complete-banner">
+
+                        <div className="complete-icon">
+                            ♡
+                        </div>
+
+                        <div>
+
+                            <h2>
+                                Thank you for learning with Prenova.
+                            </h2>
+
+                            <p>
+                                Every bit of knowledge brings you one
+                                step closer to a safer and more confident
+                                motherhood journey.
                             </p>
 
-                            {q.options.map((opt, i) => (
-                                <div key={i} className="form-check">
-                                    <input
-                                        type="radio"
-                                        className="form-check-input"
-                                        name={q._id}
-                                        checked={answers[q._id] === i}
-                                        onChange={() => handleAnswer(q._id, i)}
-                                        disabled={submitted}
-                                    />
-                                    <label className="form-check-label">
-                                        {opt}
-                                    </label>
-                                </div>
-                            ))}
                         </div>
-                    ))}
 
-                    {/* Submit */}
-                    {!submitted && !alreadyCompleted && (
-                        <button
-                            className="btn btn-purple"
-                            onClick={handleSubmit}
+                        <Link
+                            to="/dashboard"
+                            className="complete-button"
                         >
-                            Submit Quiz
-                        </button>
-                    )}
+                            Back to Dashboard →
+                        </Link>
 
-                    {/* Score */}
-                    {submitted && (
-                        <div className="alert alert-success mt-3">
-                            Your Score: {score} / {quiz.length}
-                        </div>
-                    )}
+                    </section>
+
+                )}
+
+            </main>
+
+
+            {/* =================================================
+                FOOTER
+            ================================================= */}
+
+            <footer className="prenova-footer">
+
+                <div className="footer-brand">
+
+                    <strong>Prenova</strong>
+
+                    <span>
+                        Your Safe Motherhood Learning Journey
+                    </span>
+
                 </div>
-            )}
+
+
+                <div className="footer-links">
+
+                    <Link to="/about">
+                        About Us
+                    </Link>
+
+                    <Link to="/modules">
+                        Modules
+                    </Link>
+
+                    <Link to="/resources">
+                        Resources
+                    </Link>
+
+                    <Link to="/faq">
+                        FAQ
+                    </Link>
+
+                </div>
+
+
+                <div className="footer-copy">
+                    © {new Date().getFullYear()} Prenova
+                </div>
+
+            </footer>
 
         </div>
     );

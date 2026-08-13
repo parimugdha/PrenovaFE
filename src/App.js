@@ -6,11 +6,15 @@ import Dashboard from "./pages/Dashboard";
 import Modules from "./pages/Modules";
 import ModulePage from "./pages/ModulePage";
 import PrivateRoute from "./components/PrivateRoute";
-import AdminDashboard from "./pages/AdminDashboard";
-import AdminRoute from "./components/AdminRoute"
-import AdminQuiz from "./pages/AdminQuiz";
-import AdminLayout from "./components/AdminLayout";
-import AdminAnalytics from "./pages/AdminAnalytics";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminRoute from "./components/admin/AdminRoute"
+import AdminQuiz from "./pages/admin/AdminQuiz";
+import AdminLayout from "./components/admin/AdminLayout";
+import AdminAnalytics from "./pages/admin/AdminAnalytics";
+import AboutUs from "./pages/AboutUs";
+import Resources from "./pages/Resources";
+import FAQ from "./pages/Faq";
+import Profile from "./pages/Profile";
 
 function App() {
   return (
@@ -45,6 +49,42 @@ function App() {
           element={
             <PrivateRoute>
               <ModulePage />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/about"
+          element={
+            <PrivateRoute>
+              <AboutUs />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/resources"
+          element={
+            <PrivateRoute>
+              <Resources />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/faq"
+          element={
+            <PrivateRoute>
+              <FAQ />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/profile"
+          element={
+            <PrivateRoute>
+              <Profile />
             </PrivateRoute>
           }
         />

@@ -1,114 +1,370 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import API from "../utils/api";
+import Navbar from "../components/user/Navbar";
+import SectionHeading from "../components/user/SectionHeading";
 
 export default function Modules() {
+    const [modules, setModules] = useState([]);
+    const [progress, setProgress] = useState({ modules: [] });
+    const [loading, setLoading] = useState(true);
 
-  const [modules, setModules] = useState([]);
-  const [progress, setProgress] = useState({ modules: [] });
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const [modulesRes, progressRes] = await Promise.all([
+                    API.get("/modules"),
+                    API.get("/progress")
+                ]);
 
-  useEffect(() => {
-    // 🔷 Fetch modules
-    API.get('/modules')
-      .then(res => setModules(res.data))
-      .catch(err => console.log(err));
+                setModules(modulesRes.data);
+                setProgress(progressRes.data);
+            } catch (err) {
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    // 🔷 Fetch progress
-    API.get('/progress')
-      .then(res => setProgress(res.data))
-      .catch(err => console.log(err));
-  }, []);
+        fetchData();
+    }, []);
 
-  return (
-    <div className="container mt-4">
+    const getModuleData = (moduleId) => {
+        return progress.modules?.find(
+            (item) =>
+                item.moduleId?.toString() === moduleId?.toString()
+        );
+    };
 
-      {/* 🔷 Header */}
-      <div className="text-center mb-4">
-        <h3 className="fw-bold">Prenova Modules</h3>
-        <p className="text-muted">
-          Learn step-by-step for a safe pregnancy
-        </p>
-      </div>
+    const getModuleNumber = (index) => {
+        return String(index + 1).padStart(2, "0");
+    };
 
-      {/* 🔷 Modules Grid */}
-      <div className="row">
-        {modules.map((module) => {
+    const getModuleIcon = (index) => {
+        const icons = [
+            "🤰",
+            "🥗",
+            "⚠️",
+            "👶",
+            "🍼",
+            "🧠",
+            "🛡️",
+            "👨‍👩‍👧"
+        ];
 
-          // 🔷 Find progress for this module
-          const moduleData = progress.modules?.find(
-            (m) => m.moduleId?.toString() === module._id
-          );
+        return icons[index] || "♡";
+    };
 
-          // 🔷 Button Logic
-          let buttonText = "Start Module";
-          let buttonClass = "btn-blue";
+    const getStatus = (moduleData) => {
+        if (!moduleData) {
+            return {
+                className: "not-started",
+                label: "Not Started",
+                button: "Start Module"
+            };
+        }
 
-          if (moduleData?.status === "in_progress") {
-            buttonText = "Resume";
-            buttonClass = "btn-purple";
-          }
+        if (moduleData.status === "in_progress") {
+            return {
+                className: "in-progress",
+                label: "In Progress ⏳",
+                button: "Resume"
+            };
+        }
 
-          if (moduleData?.status === "completed") {
-            buttonText = "Review";
-            buttonClass = "btn-pink";
-          }
+        if (moduleData.status === "completed") {
+            return {
+                className: "completed",
+                label: "Completed ✓",
+                button: "Review"
+            };
+        }
 
-          return (
-            <div className="col-md-6 mb-3" key={module._id}>
-              <div className="card p-3 shadow-sm h-100 d-flex flex-column justify-content-between">
+        return {
+            className: "not-started",
+            label: "Not Started",
+            button: "Start Module"
+        };
+    };
 
-                <div>
-                  {/* 🔷 Title */}
-                  <h5 className="mb-2">{module.title}</h5>
+    if (loading) {
+        return (
+            <div className="prenova-app">
+                <Navbar />
 
-                  {/* 🔷 Description */}
-                  <p className="text-muted small">
-                    {module.description}
-                  </p>
+                <main className="modules-page">
+                    <div className="modules-loading">
+                        <div className="loading-heart">♡</div>
+                        <p>Preparing your learning modules...</p>
+                    </div>
+                </main>
+            </div>
+        );
+    }
 
-                  {/* 🔷 Status Badge */}
-                  <div className="mb-2">
-                    {!moduleData && (
-                      <span className="badge bg-secondary">
-                        Not Started
-                      </span>
+    return (
+        <div className="prenova-app">
+
+            {/* ================= NAVBAR ================= */}
+
+            <Navbar />
+
+
+            {/* ================= MAIN ================= */}
+
+            <main className="modules-page">
+
+                {/* ================= HERO ================= */}
+
+                <section className="modules-hero">
+
+                    <div className="modules-hero-content">
+
+                        <div className="welcome-pill">
+                            <span>♡</span>
+                            Prenova Learning
+                        </div>
+
+                        <h1>
+                            Learn. Understand.
+                            <span>Feel Confident.</span>
+                        </h1>
+
+                        <p>
+                            Explore carefully structured learning
+                            modules designed to help you understand
+                            pregnancy, motherhood and newborn care.
+                        </p>
+
+                    </div>
+
+                    <div className="modules-hero-visual">
+
+                        <div className="modules-hero-circle">
+                            🤰
+                        </div>
+
+                        <div className="modules-hero-baby">
+                            👶
+                        </div>
+
+                        <div className="modules-hero-heart">
+                            ♡
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                {/* ================= SECTION HEADING ================= */}
+
+                <section className="modules-list-section">
+
+                    <div className="modules-list-header">
+
+                        <SectionHeading
+                            label="LEARNING MODULES"
+                            title="Your Safe Motherhood Journey"
+                            description="Learn important information step by step and build your confidence throughout your motherhood journey."
+                        />
+
+                        <Link
+                            to="/dashboard"
+                            className="modules-back-link"
+                        >
+                            ← Dashboard
+                        </Link>
+
+                    </div>
+
+
+                    {/* ================= MODULE GRID ================= */}
+
+                    {modules.length === 0 ? (
+
+                        <div className="modules-empty">
+
+                            <div className="modules-empty-icon">
+                                ♡
+                            </div>
+
+                            <h3>
+                                No modules available
+                            </h3>
+
+                            <p>
+                                Learning modules will appear here
+                                when they become available.
+                            </p>
+
+                        </div>
+
+                    ) : (
+
+                        <div className="modules-grid">
+
+                            {modules.map((module, index) => {
+
+                                const moduleData =
+                                    getModuleData(module._id);
+
+                                const status =
+                                    getStatus(moduleData);
+
+                                return (
+                                    <article
+                                        key={module._id}
+                                        className={`module-card ${status.className}`}
+                                    >
+
+                                        {/* Card Top */}
+
+                                        <div className="module-card-top">
+
+                                            <div className="module-icon">
+                                                {getModuleIcon(index)}
+                                            </div>
+
+                                            <span className="module-number">
+                                                {getModuleNumber(index)}
+                                            </span>
+
+                                        </div>
+
+
+                                        {/* Content */}
+
+                                        <div className="module-content">
+
+                                            <span
+                                                className={`module-status ${status.className}`}
+                                            >
+                                                {status.label}
+                                            </span>
+
+                                            <h3>
+                                                {module.title}
+                                            </h3>
+
+                                            {module.description && (
+                                                <p>
+                                                    {module.description}
+                                                </p>
+                                            )}
+
+                                            {moduleData?.status ===
+                                                "completed" && (
+                                                <div className="module-score">
+                                                    Score:
+                                                    <strong>
+                                                        {" "}
+                                                        {moduleData.score}
+                                                    </strong>
+                                                </div>
+                                            )}
+
+                                        </div>
+
+
+                                        {/* Button */}
+
+                                        <Link
+                                            to={`/module/${module._id}`}
+                                            className={`module-button ${status.className}`}
+                                        >
+                                            {status.button}
+
+                                            <span>
+                                                →
+                                            </span>
+                                        </Link>
+
+                                    </article>
+                                );
+                            })}
+
+                        </div>
                     )}
 
-                    {moduleData?.status === "in_progress" && (
-                      <span className="badge bg-warning text-dark">
-                        In Progress ⏳
-                      </span>
-                    )}
+                </section>
 
-                    {moduleData?.status === "completed" && (
-                      <span className="badge bg-success">
-                        Completed ✔
-                      </span>
-                    )}
-                  </div>
 
-                  {/* 🔷 Score */}
-                  {moduleData?.status === "completed" && (
-                    <small className="text-muted">
-                      Score: {moduleData.score}
-                    </small>
-                  )}
+                {/* ================= BOTTOM CTA ================= */}
+
+                <section className="modules-cta">
+
+                    <div className="modules-cta-icon">
+                        ♡
+                    </div>
+
+                    <div className="modules-cta-content">
+
+                        <h2>
+                            Every lesson brings you one step closer.
+                        </h2>
+
+                        <p>
+                            Keep learning and build confidence for
+                            a safer motherhood journey.
+                        </p>
+
+                    </div>
+
+                    <Link
+                        to="/dashboard"
+                        className="cta-button"
+                    >
+                        View My Progress →
+                    </Link>
+
+                </section>
+
+            </main>
+
+
+            {/* ================= FOOTER ================= */}
+
+            <footer className="prenova-footer">
+
+                <div className="footer-brand">
+
+                    <strong>
+                        Prenova
+                    </strong>
+
+                    <span>
+                        Your Safe Motherhood Learning Journey
+                    </span>
+
                 </div>
 
-                {/* 🔷 Button */}
-                <Link
-                  to={`/module/${module._id}`}
-                  className={`btn ${buttonClass} btn-sm mt-3`}
-                >
-                  {buttonText}
-                </Link>
+                <div className="footer-links">
 
-              </div>
-            </div>
-          );
-        })}
-      </div>
+                    <Link to="/about">
+                        About Us
+                    </Link>
 
-    </div>
-  );
+                    <Link to="/modules">
+                        Modules
+                    </Link>
+
+                    <Link to="/resources">
+                        Resources
+                    </Link>
+
+                    <Link to="/faq">
+                        FAQ
+                    </Link>
+
+                </div>
+
+                <div className="footer-copy">
+                    © {new Date().getFullYear()} Prenova
+                </div>
+
+            </footer>
+
+        </div>
+    );
 }

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 
-import API from "../utils/api";
+import API from "../../utils/api";
 
 export default function AdminQuiz() {
     const { moduleId } = useParams();
