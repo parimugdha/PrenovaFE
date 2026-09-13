@@ -480,19 +480,14 @@ export default function ModulePage() {
                         </div>
 
 
-                        <div className="learning-content">
 
-                            {content
-                                .split("\n")
-                                .map((paragraph, index) => (
+                        <div
+                            className="learning-content module-content"
+                            dangerouslySetInnerHTML={{
+                                __html: content
+                            }}
+                        />
 
-                                    <p key={index}>
-                                        {paragraph || "\u00A0"}
-                                    </p>
-
-                                ))}
-
-                        </div>
 
                     </div>
 
@@ -661,11 +656,10 @@ export default function ModulePage() {
                             {submitted && (
 
                                 <div
-                                    className={`quiz-result ${
-                                        percentage >= 60
-                                            ? "success"
-                                            : "needs-review"
-                                    }`}
+                                    className={`quiz-result ${percentage >= 60
+                                        ? "success"
+                                        : "needs-review"
+                                        }`}
                                 >
 
                                     <div className="result-icon">

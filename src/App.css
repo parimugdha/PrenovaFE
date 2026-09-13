@@ -9219,3 +9219,183 @@ img {
       padding-right: 15px;
   }
 }
+
+/* ==========================================
+   PRENOVA RICH TEXT EDITOR
+========================================== */
+
+.rich-text-editor {
+  width: 100%;
+  border: 1px solid #eadfea;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #ffffff;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.rich-text-editor:focus-within {
+  border-color: #d65a8a;
+  box-shadow: 0 0 0 3px rgba(214, 90, 138, 0.1);
+}
+
+
+/* Toolbar */
+
+.rich-text-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding: 8px 10px;
+  background: #fff5f9;
+  border-bottom: 1px solid #eadfea;
+}
+
+.rich-text-toolbar button {
+  min-width: 34px;
+  height: 32px;
+  padding: 0 9px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: #5a4665;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.rich-text-toolbar button:hover {
+  background: #ffffff;
+  border-color: #e6cddd;
+  color: #b84270;
+}
+
+.rich-text-toolbar button:active {
+  background: #f7e4ee;
+}
+
+.toolbar-divider {
+  width: 1px;
+  height: 22px;
+  background: #e4d6e1;
+  margin: 0 4px;
+}
+
+
+/* Editor */
+
+.rich-text-content {
+  min-height: 220px;
+  padding: 16px;
+  outline: none;
+  color: #3e3345;
+  font-size: 15px;
+  line-height: 1.7;
+  background: #ffffff;
+}
+
+.rich-text-content:empty::before {
+  content: attr(data-placeholder);
+  color: #a99cac;
+  pointer-events: none;
+}
+
+
+/* Formatting */
+
+.rich-text-content p {
+  margin: 0 0 12px;
+}
+
+.rich-text-content h3 {
+  margin: 15px 0 10px;
+  color: #5a347d;
+  font-size: 19px;
+}
+
+.rich-text-content strong {
+  color: #4b2a73;
+  font-weight: 700;
+}
+
+.rich-text-content ul,
+.rich-text-content ol {
+  margin: 8px 0 14px;
+  padding-left: 25px;
+}
+
+.rich-text-content li {
+  margin-bottom: 5px;
+}
+
+.rich-text-content a {
+  color: #b84270;
+  text-decoration: underline;
+}
+
+/* =========================================
+   RICH TEXT MODULE CONTENT
+========================================= */
+
+.module-content {
+  color: #3e3345;
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+.module-content p {
+  margin-bottom: 16px;
+}
+
+.module-content strong {
+  font-weight: 700;
+  color: #4b2a73;
+}
+
+.module-content em {
+  font-style: italic;
+}
+
+.module-content u {
+  text-decoration: underline;
+}
+
+.module-content h1,
+.module-content h2,
+.module-content h3,
+.module-content h4 {
+  color: #6f42c1;
+  margin-top: 24px;
+  margin-bottom: 12px;
+}
+
+.module-content h3 {
+  font-size: 21px;
+}
+
+.module-content ul,
+.module-content ol {
+  padding-left: 25px;
+  margin-bottom: 18px;
+}
+
+.module-content li {
+  margin-bottom: 8px;
+}
+
+.module-content a {
+  color: #6f42c1;
+  text-decoration: underline;
+}
+
+.module-content blockquote {
+  margin: 20px 0;
+  padding: 12px 18px;
+  border-left: 4px solid #c084fc;
+  background: #faf7ff;
+  border-radius: 6px;
+}
+
+.module-content br {
+  line-height: 1.8;
+}

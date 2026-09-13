@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import API from "../../utils/api";
+import RichTextEditor from "./RichTextEditor";
 
 const emptyForm = {
     title: "",
@@ -293,15 +294,12 @@ export default function AdminDashboard() {
                             <span>English</span>
                         </label>
 
-                        <textarea
-                            placeholder="Enter English learning content..."
+                        <RichTextEditor
                             value={form.content.en}
-                            onChange={(e) =>
-                                handleContentChange(
-                                    "en",
-                                    e.target.value
-                                )
+                            onChange={(value) =>
+                                handleContentChange("en", value)
                             }
+                            placeholder="Enter English learning content..."
                         />
 
                     </div>
@@ -316,15 +314,12 @@ export default function AdminDashboard() {
                             <span>हिंदी</span>
                         </label>
 
-                        <textarea
-                            placeholder="हिंदी learning content दर्ज करें..."
+                        <RichTextEditor
                             value={form.content.hi}
-                            onChange={(e) =>
-                                handleContentChange(
-                                    "hi",
-                                    e.target.value
-                                )
+                            onChange={(value) =>
+                                handleContentChange("hi", value)
                             }
+                            placeholder="हिंदी learning content दर्ज करें..."
                         />
 
                     </div>
@@ -339,15 +334,12 @@ export default function AdminDashboard() {
                             <span>தமிழ்</span>
                         </label>
 
-                        <textarea
-                            placeholder="தமிழ் learning content உள்ளிடவும்..."
+                        <RichTextEditor
                             value={form.content.ta}
-                            onChange={(e) =>
-                                handleContentChange(
-                                    "ta",
-                                    e.target.value
-                                )
+                            onChange={(value) =>
+                                handleContentChange("ta", value)
                             }
+                            placeholder="தமிழ் learning content உள்ளிடவும்..."
                         />
 
                     </div>
