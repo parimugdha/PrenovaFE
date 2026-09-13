@@ -5,6 +5,7 @@ import "../../src/App.css";
 import SectionHeading from "../components/user/SectionHeading";
 
 export default function ModulePage() {
+
     const { id } = useParams();
 
     const [module, setModule] = useState(null);
@@ -17,75 +18,153 @@ export default function ModulePage() {
     const [progressSaved, setProgressSaved] = useState(false);
     const [alreadyCompleted, setAlreadyCompleted] = useState(false);
 
+
     // ================= FETCH MODULE =================
 
     useEffect(() => {
+
         setLoading(true);
 
         API.get(`/modules/${id}`)
+
             .then((res) => {
+
                 setModule(res.data);
+
                 setLoading(false);
+
             })
+
             .catch((err) => {
+
                 console.log(err);
+
                 setLoading(false);
+
             });
+
     }, [id]);
 
 
     // ================= FETCH QUIZ =================
 
     useEffect(() => {
+
         API.get(`/quiz/${id}`)
-            .then((res) => setQuiz(res.data))
-            .catch((err) => console.log(err));
+
+            .then((res) => {
+
+                setQuiz(
+                    Array.isArray(res.data)
+                        ? res.data
+                        : []
+                );
+
+            })
+
+            .catch((err) =>
+                console.log(err)
+            );
+
     }, [id]);
 
 
     // ================= CHECK COMPLETION =================
 
     useEffect(() => {
+
         API.get("/progress")
+
             .then((res) => {
-                const found = res.data.modules?.find(
-                    (m) =>
-                        m.moduleId?.toString() === id &&
-                        m.status === "completed"
-                );
+
+                const found =
+                    res.data.modules?.find(
+                        (m) =>
+                            m.moduleId?.toString() ===
+                            id &&
+                            m.status ===
+                            "completed"
+                    );
 
                 if (found) {
-                    setAlreadyCompleted(true);
-                    setSubmitted(true);
-                    setScore(found.score);
+
+                    setAlreadyCompleted(
+                        true
+                    );
+
+                    setSubmitted(
+                        true
+                    );
+
+                    setScore(
+                        found.score
+                    );
+
                 }
+
             })
-            .catch((err) => console.log(err));
+
+            .catch((err) =>
+                console.log(err)
+            );
+
     }, [id]);
 
 
     // ================= SAVE IN PROGRESS =================
 
     useEffect(() => {
-        if (!module || progressSaved || alreadyCompleted) return;
 
-        API.post("/progress/save", {
-            moduleId: module._id,
-            status: "in_progress"
-        })
-            .then(() => setProgressSaved(true))
-            .catch((err) => console.log(err));
+        if (
+            !module ||
+            progressSaved ||
+            alreadyCompleted
+        ) {
+            return;
+        }
 
-    }, [module, progressSaved, alreadyCompleted]);
+        API.post(
+            "/progress/save",
+            {
+                moduleId:
+                    module._id,
+
+                status:
+                    "in_progress"
+            }
+        )
+
+            .then(() =>
+                setProgressSaved(true)
+            )
+
+            .catch((err) =>
+                console.log(err)
+            );
+
+    }, [
+        module,
+        progressSaved,
+        alreadyCompleted
+    ]);
 
 
     // ================= HANDLE ANSWER =================
 
-    const handleAnswer = (qId, optionIndex) => {
+    const handleAnswer = (
+        qId,
+        optionIndex
+    ) => {
+
         setAnswers((prev) => ({
+
             ...prev,
-            [qId]: optionIndex
+
+            [qId]:
+                optionIndex
+
         }));
+
     };
 
 
@@ -93,36 +172,61 @@ export default function ModulePage() {
 
     const handleSubmit = async () => {
 
-        if (quiz.length === 0) return;
+        if (quiz.length === 0) {
+            return;
+        }
 
         let correct = 0;
 
         quiz.forEach((q) => {
-            if (answers[q._id] === q.correctAnswer) {
+
+            if (
+                answers[q._id] ===
+                q.correctAnswer
+            ) {
+
                 correct++;
+
             }
+
         });
 
         setScore(correct);
+
         setSubmitted(true);
 
         try {
-            await API.post("/progress/save", {
-                moduleId: id,
-                score: correct,
-                status: "completed"
-            });
+
+            await API.post(
+                "/progress/save",
+                {
+                    moduleId: id,
+                    score: correct,
+                    status: "completed"
+                }
+            );
+
+            setAlreadyCompleted(
+                true
+            );
+
         } catch (err) {
+
             console.log(err);
+
         }
+
     };
 
 
     // ================= LOADING =================
 
     if (loading) {
+
         return (
+
             <div className="module-loading">
+
                 <div className="loading-heart">
                     ♡
                 </div>
@@ -130,15 +234,20 @@ export default function ModulePage() {
                 <p>
                     Preparing your learning journey...
                 </p>
+
             </div>
+
         );
+
     }
 
 
     // ================= NOT FOUND =================
 
     if (!module) {
+
         return (
+
             <div className="module-not-found">
 
                 <div className="not-found-icon">
@@ -162,7 +271,9 @@ export default function ModulePage() {
                 </Link>
 
             </div>
+
         );
+
     }
 
 
@@ -174,14 +285,80 @@ export default function ModulePage() {
         "Learning content is not available.";
 
 
+    // =================================================
+    // MODULE IMAGES
+    // =================================================
+    // New format:
+    // images: ["url1", "url2"]
+    //
+    // Old format:
+    // image: ["url1", "url2"]
+    //
+    // Also supports:
+    // image: "url"
+    // =================================================
+
+    let moduleImages = [];
+
+
+    if (
+        Array.isArray(module.images)
+    ) {
+
+        moduleImages =
+            module.images.filter(
+                Boolean
+            );
+
+    }
+
+    else if (
+        Array.isArray(module.image)
+    ) {
+
+        moduleImages =
+            module.image.filter(
+                Boolean
+            );
+
+    }
+
+    else if (
+        module.image
+    ) {
+
+        moduleImages = [
+            module.image
+        ];
+
+    }
+
+
+    // Remove duplicate / empty values
+
+    moduleImages =
+        [...new Set(moduleImages)]
+            .filter(
+                (image) =>
+                    typeof image === "string" &&
+                    image.trim() !== ""
+            )
+            .slice(0, 5);
+
+
     const percentage =
         quiz.length > 0
-            ? Math.round((score / quiz.length) * 100)
+            ? Math.round(
+                (score / quiz.length) *
+                100
+            )
             : 0;
 
 
     return (
+
         <div className="prenova-app">
+
 
             {/* =================================================
                 NAVBAR
@@ -190,6 +367,7 @@ export default function ModulePage() {
             <nav className="prenova-navbar">
 
                 <div className="prenova-navbar-inner">
+
 
                     {/* Brand */}
 
@@ -201,6 +379,7 @@ export default function ModulePage() {
                         <div className="prenova-logo">
                             ♡
                         </div>
+
 
                         <div>
 
@@ -289,6 +468,7 @@ export default function ModulePage() {
 
             <main className="module-page">
 
+
                 {/* ================= BACK ================= */}
 
                 <Link
@@ -308,17 +488,27 @@ export default function ModulePage() {
                     <div className="module-hero-content">
 
                         <div className="welcome-pill">
-                            <span>♡</span>
+
+                            <span>
+                                ♡
+                            </span>
+
                             PRENOVA LEARNING MODULE
+
                         </div>
+
 
                         <h1>
                             {module.title}
                         </h1>
 
+
                         <p>
+
                             {module.description ||
-                                "Learn important information and build confidence for a safer motherhood journey."}
+                                "Learn important information and build confidence for a safer motherhood journey."
+                            }
+
                         </p>
 
 
@@ -328,16 +518,22 @@ export default function ModulePage() {
                                 📖 Learning Module
                             </span>
 
+
                             {quiz.length > 0 && (
+
                                 <span>
                                     📝 {quiz.length} Questions
                                 </span>
+
                             )}
 
+
                             {alreadyCompleted && (
+
                                 <span className="completed-pill">
                                     ✓ Completed
                                 </span>
+
                             )}
 
                         </div>
@@ -373,20 +569,34 @@ export default function ModulePage() {
                     <section className="learning-video-section">
 
                         <SectionHeading
+
                             label="WATCH & LEARN"
+
                             title="Learn through video"
+
                             description="Watch the educational video before moving on to the learning content."
+
                         />
+
 
                         <div className="video-card">
 
                             <div className="video-wrapper">
 
                                 <iframe
-                                    src={module.video}
-                                    title={module.title}
+
+                                    src={
+                                        module.video
+                                    }
+
+                                    title={
+                                        module.title
+                                    }
+
                                     allowFullScreen
+
                                     loading="lazy"
+
                                 />
 
                             </div>
@@ -419,32 +629,50 @@ export default function ModulePage() {
 
                     <div className="language-tabs">
 
-                        {["en", "hi", "ta"].map((language) => (
+                        {[
+                            "en",
+                            "hi",
+                            "ta"
+                        ].map(
+                            (language) => (
 
-                            <button
-                                key={language}
-                                className={
-                                    lang === language
-                                        ? "language-tab active"
-                                        : "language-tab"
-                                }
-                                onClick={() =>
-                                    setLang(language)
-                                }
-                            >
+                                <button
 
-                                {language === "en" &&
-                                    "English"}
+                                    key={
+                                        language
+                                    }
 
-                                {language === "hi" &&
-                                    "हिंदी"}
+                                    className={
+                                        lang ===
+                                            language
+                                            ? "language-tab active"
+                                            : "language-tab"
+                                    }
 
-                                {language === "ta" &&
-                                    "தமிழ்"}
+                                    onClick={() =>
+                                        setLang(
+                                            language
+                                        )
+                                    }
 
-                            </button>
+                                >
 
-                        ))}
+                                    {language ===
+                                        "en" &&
+                                        "English"}
+
+                                    {language ===
+                                        "hi" &&
+                                        "हिंदी"}
+
+                                    {language ===
+                                        "ta" &&
+                                        "தமிழ்"}
+
+                                </button>
+
+                            )
+                        )}
 
                     </div>
 
@@ -459,11 +687,13 @@ export default function ModulePage() {
 
                     <div className="learning-content-card">
 
+
                         <div className="learning-content-header">
 
                             <div className="content-icon">
                                 📖
                             </div>
+
 
                             <div>
 
@@ -472,7 +702,8 @@ export default function ModulePage() {
                                 </span>
 
                                 <h2>
-                                    Understanding {module.title}
+                                    Understanding{" "}
+                                    {module.title}
                                 </h2>
 
                             </div>
@@ -480,14 +711,70 @@ export default function ModulePage() {
                         </div>
 
 
+                        {/* =================================================
+                            COMMON MODULE IMAGES
+                        ================================================= */}
+
+                        {moduleImages.length > 0 && (
+
+                            <div className="module-images-container">
+
+                                {moduleImages.map(
+                                    (
+                                        image,
+                                        index
+                                    ) => (
+
+                                        <img
+
+                                            key={
+                                                `${image}-${index}`
+                                            }
+
+                                            src={
+                                                image
+                                            }
+
+                                            alt={`${module.title} ${index + 1}`}
+
+                                            className="module-small-image"
+
+                                            onError={(e) => {
+
+                                                console.error(
+                                                    "MODULE IMAGE FAILED:",
+                                                    image
+                                                );
+
+                                                e.currentTarget.style.display =
+                                                    "none";
+
+                                            }}
+
+                                        />
+
+                                    )
+                                )}
+
+                            </div>
+
+                        )}
+
+
+                        {/* =================================================
+                            LANGUAGE CONTENT
+                        ================================================= */}
 
                         <div
-                            className="learning-content module-content"
-                            dangerouslySetInnerHTML={{
-                                __html: content
-                            }}
-                        />
 
+                            className="learning-content module-content"
+
+                            dangerouslySetInnerHTML={{
+                                __html:
+                                    content
+                            }}
+
+                        />
 
                     </div>
 
@@ -503,127 +790,184 @@ export default function ModulePage() {
                     <section className="quiz-section">
 
                         <SectionHeading
+
                             label="TEST YOUR KNOWLEDGE"
+
                             title="Quick Knowledge Check"
+
                             description="Answer the questions below to complete this module."
+
                         />
 
 
                         <div className="quiz-card">
 
-                            {quiz.map((q, index) => {
+                            {quiz.map(
+                                (
+                                    q,
+                                    index
+                                ) => {
 
-                                const selected =
-                                    answers[q._id];
-
-                                return (
-
-                                    <div
-                                        key={q._id}
-                                        className="quiz-question"
-                                    >
-
-                                        <div className="question-number">
-                                            {index + 1}
-                                        </div>
+                                    const selected =
+                                        answers[
+                                            q._id
+                                        ];
 
 
-                                        <div className="question-content">
+                                    return (
 
-                                            <h3>
-                                                {q.question}
-                                            </h3>
+                                        <div
+
+                                            key={
+                                                q._id
+                                            }
+
+                                            className="quiz-question"
+
+                                        >
+
+                                            <div className="question-number">
+                                                {index + 1}
+                                            </div>
 
 
-                                            <div className="quiz-options">
+                                            <div className="question-content">
 
-                                                {q.options.map(
-                                                    (option, optionIndex) => {
+                                                <h3>
+                                                    {q.question}
+                                                </h3>
 
-                                                        const isSelected =
-                                                            selected ===
-                                                            optionIndex;
 
-                                                        const isCorrect =
-                                                            submitted &&
-                                                            optionIndex ===
-                                                            q.correctAnswer;
+                                                <div className="quiz-options">
 
-                                                        const isWrong =
-                                                            submitted &&
-                                                            isSelected &&
-                                                            !isCorrect;
+                                                    {q.options.map(
+                                                        (
+                                                            option,
+                                                            optionIndex
+                                                        ) => {
 
-                                                        let optionClass =
-                                                            "quiz-option";
+                                                            const isSelected =
+                                                                selected ===
+                                                                optionIndex;
 
-                                                        if (isSelected) {
-                                                            optionClass +=
-                                                                " selected";
-                                                        }
 
-                                                        if (isCorrect) {
-                                                            optionClass +=
-                                                                " correct";
-                                                        }
+                                                            const isCorrect =
+                                                                submitted &&
+                                                                optionIndex ===
+                                                                q.correctAnswer;
 
-                                                        if (isWrong) {
-                                                            optionClass +=
-                                                                " wrong";
-                                                        }
 
-                                                        return (
+                                                            const isWrong =
+                                                                submitted &&
+                                                                isSelected &&
+                                                                !isCorrect;
 
-                                                            <label
-                                                                key={optionIndex}
-                                                                className={
-                                                                    optionClass
-                                                                }
-                                                            >
 
-                                                                <input
-                                                                    type="radio"
-                                                                    name={q._id}
-                                                                    checked={
-                                                                        selected ===
+                                                            let optionClass =
+                                                                "quiz-option";
+
+
+                                                            if (
+                                                                isSelected
+                                                            ) {
+
+                                                                optionClass +=
+                                                                    " selected";
+
+                                                            }
+
+
+                                                            if (
+                                                                isCorrect
+                                                            ) {
+
+                                                                optionClass +=
+                                                                    " correct";
+
+                                                            }
+
+
+                                                            if (
+                                                                isWrong
+                                                            ) {
+
+                                                                optionClass +=
+                                                                    " wrong";
+
+                                                            }
+
+
+                                                            return (
+
+                                                                <label
+
+                                                                    key={
                                                                         optionIndex
                                                                     }
-                                                                    onChange={() =>
-                                                                        handleAnswer(
-                                                                            q._id,
+
+                                                                    className={
+                                                                        optionClass
+                                                                    }
+
+                                                                >
+
+                                                                    <input
+
+                                                                        type="radio"
+
+                                                                        name={
+                                                                            q._id
+                                                                        }
+
+                                                                        checked={
+                                                                            selected ===
                                                                             optionIndex
-                                                                        )
-                                                                    }
-                                                                    disabled={
-                                                                        submitted
-                                                                    }
-                                                                />
+                                                                        }
 
-                                                                <span className="custom-radio">
-                                                                    {isCorrect
-                                                                        ? "✓"
-                                                                        : ""}
-                                                                </span>
+                                                                        onChange={() =>
+                                                                            handleAnswer(
+                                                                                q._id,
+                                                                                optionIndex
+                                                                            )
+                                                                        }
 
-                                                                <span>
-                                                                    {option}
-                                                                </span>
+                                                                        disabled={
+                                                                            submitted
+                                                                        }
 
-                                                            </label>
+                                                                    />
 
-                                                        );
-                                                    }
-                                                )}
+
+                                                                    <span className="custom-radio">
+
+                                                                        {isCorrect
+                                                                            ? "✓"
+                                                                            : ""}
+
+                                                                    </span>
+
+
+                                                                    <span>
+                                                                        {option}
+                                                                    </span>
+
+                                                                </label>
+
+                                                            );
+
+                                                        }
+                                                    )}
+
+                                                </div>
 
                                             </div>
 
                                         </div>
 
-                                    </div>
+                                    );
 
-                                );
-
-                            })}
+                                }
+                            )}
 
 
                             {/* ================= SUBMIT ================= */}
@@ -638,12 +982,23 @@ export default function ModulePage() {
                                             all questions before submitting.
                                         </p>
 
+
                                         <button
+
                                             className="quiz-submit-button"
-                                            onClick={handleSubmit}
+
+                                            onClick={
+                                                handleSubmit
+                                            }
+
                                         >
+
                                             Complete Module
-                                            <span>→</span>
+
+                                            <span>
+                                                →
+                                            </span>
+
                                         </button>
 
                                     </div>
@@ -656,15 +1011,18 @@ export default function ModulePage() {
                             {submitted && (
 
                                 <div
+
                                     className={`quiz-result ${percentage >= 60
-                                        ? "success"
-                                        : "needs-review"
+                                            ? "success"
+                                            : "needs-review"
                                         }`}
+
                                 >
 
                                     <div className="result-icon">
 
-                                        {percentage >= 60
+                                        {percentage >=
+                                            60
                                             ? "✓"
                                             : "↻"}
 
@@ -674,29 +1032,40 @@ export default function ModulePage() {
                                     <div className="result-content">
 
                                         <span>
+
                                             {alreadyCompleted
                                                 ? "MODULE COMPLETED"
                                                 : "QUIZ COMPLETED"}
+
                                         </span>
+
 
                                         <h3>
 
-                                            {percentage >= 60
+                                            {percentage >=
+                                                60
                                                 ? "Well done! 🌸"
                                                 : "Keep learning and try again."}
 
                                         </h3>
 
+
                                         <p>
+
                                             You scored{" "}
+
                                             <strong>
                                                 {score}
                                             </strong>{" "}
+
                                             out of{" "}
+
                                             <strong>
                                                 {quiz.length}
                                             </strong>{" "}
+
                                             questions.
+
                                         </p>
 
                                     </div>
@@ -729,6 +1098,7 @@ export default function ModulePage() {
                             ♡
                         </div>
 
+
                         <div>
 
                             <h2>
@@ -742,6 +1112,7 @@ export default function ModulePage() {
                             </p>
 
                         </div>
+
 
                         <Link
                             to="/dashboard"
@@ -765,7 +1136,9 @@ export default function ModulePage() {
 
                 <div className="footer-brand">
 
-                    <strong>Prenova</strong>
+                    <strong>
+                        Prenova
+                    </strong>
 
                     <span>
                         Your Safe Motherhood Learning Journey
@@ -802,5 +1175,7 @@ export default function ModulePage() {
             </footer>
 
         </div>
+
     );
+
 }

@@ -9399,3 +9399,77 @@ img {
 .module-content br {
   line-height: 1.8;
 }
+
+/* =================================================
+   COMMON MODULE IMAGE
+================================================= */
+
+/* =================================================
+   COMMON MODULE IMAGES
+================================================= */
+
+.module-images-container {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin: 10px 0 28px;
+  justify-content: flex-start;
+}
+
+.module-small-image {
+  width: 180px;
+  height: 120px;
+  object-fit: cover;
+  display: block;
+  border-radius: 12px;
+}
+
+
+/* =================================================
+ MOBILE
+================================================= */
+
+@media (max-width: 600px) {
+
+  .module-images-container {
+      gap: 10px;
+  }
+
+  .module-small-image {
+      width: calc(50% - 5px);
+      height: 105px;
+  }
+
+}
+
+/* ===============================
+   COMMON MODULE IMAGES
+   =============================== */
+
+   .module-images-container {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin: 20px 0 28px;
+}
+
+.module-small-image {
+    width: 180px;
+    height: 120px;
+    object-fit: cover;
+    display: block;
+    border-radius: 12px;
+}
+
+@media (max-width: 600px) {
+    .module-images-container {
+        gap: 10px;
+    }
+
+    .module-small-image {
+        width: calc(50% - 5px);
+        height: 105px;
+    }
+}
